@@ -56,7 +56,8 @@ def parse_tweet(tweet, include_retweets, image_size, results):
                     if image_size in media['sizes'] or image_size == 'orig':
                         url += ":" + image_size
                     else:
-                        print('Size `{0}` not found for image `{1}`'.format(image_size, media['media_url_https']))
+                        print('Size `{0}` not found for image `{1}`'.format(
+                            image_size, media['media_url_https']))
                     urls['images'].append(url)
 
     # Urls
@@ -84,7 +85,8 @@ def parse_tweet(tweet, include_retweets, image_size, results):
 def get_medias(auth, user_id, include_retweets, image_size, since, since_id, until, until_id, likes):
     """Get all medias for a given Twitter user."""
     auth = tweepy.OAuthHandler(auth['consumer_token'], auth['consumer_secret'])
-    api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+    api = tweepy.API(auth, wait_on_rate_limit=True,
+                     wait_on_rate_limit_notify=True)
 
     results = {
         'tweets': 0,

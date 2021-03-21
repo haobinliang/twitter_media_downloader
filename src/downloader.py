@@ -3,6 +3,7 @@
 from __future__ import print_function
 import os
 import requests
+from datetime import datetime
 from tqdm import tqdm
 
 
@@ -30,7 +31,7 @@ def download(data, output_dir, stream, show_already_exists):
         if os.path.exists(path) and os.path.getsize(path) > 0:
             if show_already_exists:
                 print('{0}: already exists'.format(filename))
-            continue
+            break
 
         # Create directory if necessary
         pathDir = os.path.dirname(path)
@@ -39,6 +40,10 @@ def download(data, output_dir, stream, show_already_exists):
 
         r = requests.get(url, stream=stream)
         total_length = r.headers.get('content-length')
+        last_access = datetime.strptime(
+            r.headers.get('Date'), '%a, %d %b %Y %H:%M:%S GMT')
+        last_modified = datetime.strptime(r.headers.get(
+            'Last-Modified'), '%a, %d %b %Y %H:%M:%S GMT')
 
         with open(path, 'wb') as f:
             if not stream or total_length is None:
@@ -49,11 +54,14 @@ def download(data, output_dir, stream, show_already_exists):
                 for data in tqdm(iterable=r.iter_content(), unit='b', unit_scale=True, total=int(total_length), desc=filename):
                     f.write(data)
 
+        os.utime(path, (last_access.timestamp(), last_modified.timestamp()))
+
     # Download periscope
     if data['urls']['periscope']:
         try:
             from pyriscope import processor
             processor.process(data['urls']['periscope'])
         except ImportError:
-            print('You need the `{0}` module to download Periscope videos'.format('pyriscope'))
+            print('You need the `{0}` module to download Periscope videos'.format(
+                'pyriscope'))
         pass
